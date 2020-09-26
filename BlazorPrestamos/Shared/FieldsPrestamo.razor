@@ -1,0 +1,32 @@
+﻿<div class="form-field">
+    <label>PresonaId: </label>
+    <div>
+        <InputNumber @bind-Value="Prestamo.PersonaId" /><br />
+        <ValidationMessage For="()=>Prestamo.PersonaId" />
+    </div>
+</div>
+<div class="form-field">
+    <label>Concepto: </label>
+    <div>
+        <InputText @bind-Value="Prestamo.Concepto" /><br />
+        <ValidationMessage For="()=>Prestamo.Concepto" />
+    </div>
+</div>
+<div class="form-field">
+    <label>Balance: </label>
+    <div>
+        <InputNumber disable="true" @bind-Value="Prestamo.Balance" /><br />
+        <ValidationMessage For="()=>Prestamo.Balance" />
+    </div>
+</div>
+<div class="form-field">
+    <label>Mondo: </label>
+    <div>
+        <InputNumber disable="true" @bind-Value="Prestamo.Monto" /><br />
+        <ValidationMessage For="()=>Prestamo.Monto" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public Prestamo Prestamo { get; set; }
+}

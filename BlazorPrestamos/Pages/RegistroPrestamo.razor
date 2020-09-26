@@ -1,0 +1,124 @@
+﻿@page "/prestamos"
+
+<div class="main-header-list">
+    <h2>Lista de prestamo</h2>
+    <button type="button" class="btn btn-success" @onclick="AgregarPrestamo">+ Agregar</button>
+    <div class="filter">
+        <select class="custom-select" @bind="indexSelect">
+            <option value="0">Filtrar por</option>
+            <option value="1">PrestamoId</option>
+            <option value="2">PersonaId</option>
+        </select>
+        <input type="number" @bind="criterioDeBusqueda" />
+        <button class="btn btn-outline-primary" @onclick="FiltarPrestamos">Buscar</button>
+    </div>
+</div>
+
+
+@if (Prestamos == null || PrestamosFiltrados == null) {
+    <div class="loading-message">
+        <span>Cargando...</span>
+    </div>
+} else {
+    <table class="table table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Id</th>
+                <th>PersonaId</th>
+                <th>Balance</th>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prestamo in PrestamosFiltrados) {
+            <tr>
+                <td>@prestamo.Id</td>
+                <td>@prestamo.PersonaId</td>
+                <td>@prestamo.Balance</td>
+                <th>@prestamo.Fecha</th>
+                <th>@prestamo.Monto</th>
+                <td><button class="btn btn-warning" @onclick="()=>ModificarPrestamo(prestamo)">Mas</button></td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (MostraDialogoEditor) {
+    <DialogoPrestamo prestamo="prestamoEnModificacion"
+             OnClose="OcultarDialogo"
+             EsNuevoPrestamo="esNuevo" />
+}
+
+
+
+@code {
+
+        bool MostraDialogoEditor = false;
+        bool esNuevo = false;
+
+        int indexSelect = 0; //indice actual del select
+        string criterioDeBusqueda;
+
+        Prestamo prestamoEnModificacion = new Prestamo();
+
+    public List<Prestamo> Prestamos { get; set; }
+    public List<Prestamo> PrestamosFiltrados { get; set; }
+
+    protected async override Task OnInitializedAsync() {
+        Prestamos = await PrestamosBLL.GetPrestamos();
+        PrestamosFiltrados = Prestamos;
+    }
+
+    void ModificarPrestamo(Prestamo prestamo) {
+        prestamoEnModificacion = prestamo;
+        esNuevo = false;
+        MostraDialogoEditor = true;
+    }
+
+    void AgregarPrestamo() {
+        prestamoEnModificacion = new Prestamo();
+        esNuevo = true;
+        MostraDialogoEditor = true;
+    }
+
+    async Task OcultarDialogo() {
+        MostraDialogoEditor = false;
+        Prestamos = await PrestamosBLL.GetPrestamos();
+        QuitarFiltros();
+    }
+
+    void QuitarFiltros() {
+        indexSelect = 0;
+        criterioDeBusqueda = "";
+        FiltarPrestamos();
+    }
+
+    void FiltarPrestamos() {
+
+        if (indexSelect == 0) {//Todos
+
+            PrestamosFiltrados = Prestamos.Where(e => true).ToList();
+
+        } else if (indexSelect == 1) {//Id
+
+            if (int.TryParse(criterioDeBusqueda , out int Id)) {
+
+                PrestamosFiltrados = Prestamos.Where(e => e.Id == Id).ToList();
+            }
+
+        } else if (indexSelect == 2) {//PrestamoId
+
+            if (int.TryParse(criterioDeBusqueda , out int Id)) {
+                PrestamosFiltrados = Prestamos.Where(e => e.PersonaId == Id).ToList();
+            }
+
+        }
+
+    }
+
+
+
+}

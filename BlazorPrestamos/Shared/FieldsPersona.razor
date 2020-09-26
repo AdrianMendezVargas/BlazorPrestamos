@@ -1,0 +1,18 @@
+﻿<div class="form-field">
+    <label>Nombres: </label>
+    <div>
+        <InputText @bind-Value="Persona.Nombres" /><br />
+        <ValidationMessage For="()=>Persona.Nombres" />
+    </div>
+</div>
+<div class="form-field">
+    <label>Balance: </label>
+    <div>
+        <InputNumber disable="true" @bind-Value="Persona.Balance" /><br />
+        <ValidationMessage For="()=>Persona.Balance" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public Persona Persona { get; set; }
+}
