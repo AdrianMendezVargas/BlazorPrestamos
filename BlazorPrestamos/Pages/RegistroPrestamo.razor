@@ -1,4 +1,5 @@
 ﻿@page "/prestamos"
+@inject IToastService toast
 
 <div class="main-header-list">
     <h2>Lista de prestamo</h2>
@@ -33,36 +34,49 @@
         </thead>
         <tbody>
             @foreach (var prestamo in PrestamosFiltrados) {
-            <tr>
-                <td>@prestamo.Id</td>
-                <td>@prestamo.PersonaId</td>
-                <td>@prestamo.Balance</td>
-                <th>@prestamo.Fecha</th>
-                <th>@prestamo.Monto</th>
-                <td><button class="btn btn-warning" @onclick="()=>ModificarPrestamo(prestamo)">Mas</button></td>
-            </tr>
+                <tr>
+                    <td>@prestamo.Id</td>
+                    <td>@prestamo.PersonaId</td>
+                    <td>@prestamo.Balance</td>
+                    <th>@prestamo.Fecha</th>
+                    <th>@prestamo.Monto</th>
+                    <td><button class="btn btn-warning" @onclick="()=>ModificarPrestamo(prestamo)">Mas</button></td>
+                </tr>
             }
         </tbody>
     </table>
 }
 
 @if (MostraDialogoEditor) {
-    <DialogoPrestamo prestamo="prestamoEnModificacion"
-             OnClose="OcultarDialogo"
-             EsNuevoPrestamo="esNuevo" />
+    Title = EsNuevoPrestamo ? "Nuevo Prestamo" : "Modificar Prestamo";
+
+    <Dialogo Title="@Title" OnClose="OcultarDialogo">
+        <Body>
+            <EditForm id="form-prestamos" Model="prestamoEnModificacion" OnValidSubmit="Guardar">
+                <FieldsPrestamo Prestamo="prestamoEnModificacion" />
+                <DataAnnotationsValidator />
+            </EditForm>
+        </Body>
+        <Footer>
+            <button type="button" disabled="@(!EsNuevoPrestamo)" class="btn btn-warning" @onclick="Nuevo">Nuevo</button>
+            <input type="submit" form="form-prestamos" class="btn btn-success" value="Guardar" />
+            <button type="button" disabled="@(EsNuevoPrestamo)" class="btn btn-danger" @onclick="Eliminar">Eliminar</button>
+        </Footer>
+    </Dialogo>
 }
 
 
 
 @code {
 
-        bool MostraDialogoEditor = false;
-        bool esNuevo = false;
+    bool MostraDialogoEditor = false;
+    bool EsNuevoPrestamo = false;
+    string Title;
 
-        int indexSelect = 0; //indice actual del select
-        string criterioDeBusqueda;
+    int indexSelect = 0; //indice actual del select
+    string criterioDeBusqueda;
 
-        Prestamo prestamoEnModificacion = new Prestamo();
+    Prestamo prestamoEnModificacion = new Prestamo();
 
     public List<Prestamo> Prestamos { get; set; }
     public List<Prestamo> PrestamosFiltrados { get; set; }
@@ -74,13 +88,13 @@
 
     void ModificarPrestamo(Prestamo prestamo) {
         prestamoEnModificacion = prestamo;
-        esNuevo = false;
+        EsNuevoPrestamo = false;
         MostraDialogoEditor = true;
     }
 
     void AgregarPrestamo() {
         prestamoEnModificacion = new Prestamo();
-        esNuevo = true;
+        EsNuevoPrestamo = true;
         MostraDialogoEditor = true;
     }
 
@@ -94,6 +108,44 @@
         indexSelect = 0;
         criterioDeBusqueda = "";
         FiltarPrestamos();
+    }
+
+    void Nuevo() {
+        prestamoEnModificacion = new Prestamo();
+    }
+    async Task Guardar() {
+
+        Persona persona = await PersonasBLL.Buscar(prestamoEnModificacion.PersonaId);
+
+        if (persona == null) {
+            toast.ShowError("Esta persona no existe");
+            return;
+
+        } else {
+            bool guardo;
+
+            guardo = await PrestamosBLL.Guardar(prestamoEnModificacion);
+
+            if (guardo) {
+                toast.ShowSuccess("Guardado ");
+                Nuevo();
+                await OcultarDialogo();
+            } else
+                toast.ShowError("Error al guardar");
+        }
+    }
+
+    async Task Eliminar() {
+        bool eliminado;
+
+        eliminado = await PrestamosBLL.Eliminar(prestamoEnModificacion.Id);
+
+        if (eliminado) {
+            toast.ShowSuccess("Eliminado");
+            Nuevo();
+            await OcultarDialogo();
+        } else
+            toast.ShowError("Error al eliminar");
     }
 
     void FiltarPrestamos() {

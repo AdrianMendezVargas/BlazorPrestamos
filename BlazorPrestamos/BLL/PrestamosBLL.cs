@@ -21,6 +21,8 @@ namespace BlazorPrestamos.BLL {
             Contexto contexto = new Contexto();
 
             try {
+                prestamo.Balance = prestamo.Monto;
+                prestamo.Fecha = DateTime.Now;
                 contexto.Prestamos.Add(prestamo);
                 paso = (await contexto.SaveChangesAsync() > 0);
 

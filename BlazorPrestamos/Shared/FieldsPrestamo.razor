@@ -1,5 +1,5 @@
 ﻿<div class="form-field">
-    <label>PresonaId: </label>
+    <label>PersonaId: </label>
     <div>
         <InputNumber @bind-Value="Prestamo.PersonaId" /><br />
         <ValidationMessage For="()=>Prestamo.PersonaId" />
@@ -15,12 +15,12 @@
 <div class="form-field">
     <label>Balance: </label>
     <div>
-        <InputNumber disable="true" @bind-Value="Prestamo.Balance" /><br />
+        <input type="number" readonly value="@Prestamo.Balance" /><br />
         <ValidationMessage For="()=>Prestamo.Balance" />
     </div>
 </div>
 <div class="form-field">
-    <label>Mondo: </label>
+    <label>Monto: </label>
     <div>
         <InputNumber disable="true" @bind-Value="Prestamo.Monto" /><br />
         <ValidationMessage For="()=>Prestamo.Monto" />

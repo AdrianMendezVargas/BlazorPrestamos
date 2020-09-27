@@ -8,7 +8,7 @@
 <div class="form-field">
     <label>Balance: </label>
     <div>
-        <InputNumber disable="true" @bind-Value="Persona.Balance" /><br />
+        <input type="number" readonly value="@Persona.Balance" /><br />
         <ValidationMessage For="()=>Persona.Balance" />
     </div>
 </div>
