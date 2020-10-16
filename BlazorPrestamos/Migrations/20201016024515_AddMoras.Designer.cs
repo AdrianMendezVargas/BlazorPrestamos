@@ -9,14 +9,36 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorPrestamos.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20200926181356_addPrestamos")]
-    partial class addPrestamos
+    [Migration("20201016024515_AddMoras")]
+    partial class AddMoras
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.8");
+
+            modelBuilder.Entity("BlazorPrestamos.Entidades.Mora", b =>
+                {
+                    b.Property<int>("MoraId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PrestamoId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("MoraId");
+
+                    b.HasIndex("PrestamoId");
+
+                    b.ToTable("Mora");
+                });
 
             modelBuilder.Entity("BlazorPrestamos.Entidades.Persona", b =>
                 {
@@ -38,7 +60,7 @@ namespace BlazorPrestamos.Migrations
 
             modelBuilder.Entity("BlazorPrestamos.Entidades.Prestamo", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("PrestamoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -57,9 +79,18 @@ namespace BlazorPrestamos.Migrations
                     b.Property<int>("PersonaId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                    b.HasKey("PrestamoId");
 
                     b.ToTable("Prestamos");
+                });
+
+            modelBuilder.Entity("BlazorPrestamos.Entidades.Mora", b =>
+                {
+                    b.HasOne("BlazorPrestamos.Entidades.Prestamo", null)
+                        .WithMany("Moras")
+                        .HasForeignKey("PrestamoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

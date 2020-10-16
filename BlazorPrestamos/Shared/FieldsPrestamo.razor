@@ -1,32 +1,135 @@
-﻿<div class="form-field">
-    <label>PersonaId: </label>
-    <div>
-        <InputNumber @bind-Value="Prestamo.PersonaId" /><br />
-        <ValidationMessage For="()=>Prestamo.PersonaId" />
+﻿<style>
+    .form-field {
+        display: flex;
+        margin: 0.5rem;
+        width: 80%;
+    }
+
+        .form-field > label {
+            width: 8rem;
+        }
+
+        .form-field > div {
+            flex-grow: 1;
+        }
+
+        .form-field input {
+            width: 100%;
+        }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="form-field">
+            <label>PersonaId: </label>
+            <div>
+                <InputNumber @bind-Value="Prestamo.PersonaId" /><br />
+                <ValidationMessage For="()=>Prestamo.PersonaId" />
+            </div>
+        </div>
+        <div class="form-field">
+            <label>Concepto: </label>
+            <div>
+                <InputText @bind-Value="Prestamo.Concepto" /><br />
+                <ValidationMessage For="()=>Prestamo.Concepto" />
+            </div>
+        </div>
+        <div class="form-field">
+            <label>Balance: </label>
+            <div>
+                <input type="number" readonly value="@Prestamo.Balance" /><br />
+                <ValidationMessage For="()=>Prestamo.Balance" />
+            </div>
+        </div>
+        <div class="form-field">
+            <label>Monto: </label>
+            <div>
+                <InputNumber disable="true" @bind-Value="Prestamo.Monto" /><br />
+                <ValidationMessage For="()=>Prestamo.Monto" />
+            </div>
+        </div>
     </div>
-</div>
-<div class="form-field">
-    <label>Concepto: </label>
-    <div>
-        <InputText @bind-Value="Prestamo.Concepto" /><br />
-        <ValidationMessage For="()=>Prestamo.Concepto" />
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <div class="form-row">
+                <div class="col-sm">
+                    <h4>MORAS</h4>
+                </div>
+                <div class="col-sm">
+                    <label style="width:auto;" class="col-form-label text-right m-0">Monto de mora </label>
+                </div>
+                <div class="col-sm">
+                    <InputNumber class="form-control" @bind-Value="NuevaMora.Monto" />
+                    <ValidationMessage For="()=>NuevaMora.Monto" />
+                </div>
+                <div class="col-sm">
+                    <button type="submit" form="mora-form" class="btn btn-dark border-white">
+                        <i class="oi oi-plus" />
+                        Añadir
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        <div class="card-body">
+            <EditForm id="mora-form" Model="NuevaMora" OnValidSubmit="AgregarMora">
+
+                <table class="table table-hover table-sm w-100">
+                    <thead>
+                        <tr>
+                            <th>Monto</th>
+                            <th>Fecha</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var mora in Prestamo.Moras) {
+                            <tr>
+                                <td>@mora.Monto.ToString("C")</td>
+                                <td>@mora.Fecha</td>
+                                <td>
+                                    <button type="button" class="btn btn-danger" @onclick="()=>EliminarMora(mora)">
+                                        <i class="oi oi-trash" />
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    @if (Prestamo.Moras.Count > 1) {
+                        <tfoot class="bg-dark text-light btn btn-dark">
+                            <tr>
+                                <td>Total:</td>
+                                <td>@Prestamo.BalanceMoras().ToString("C")</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    }
+
+                </table>
+                <DataAnnotationsValidator />
+            </EditForm>
+
+        </div>
     </div>
+
+
 </div>
-<div class="form-field">
-    <label>Balance: </label>
-    <div>
-        <input type="number" readonly value="@Prestamo.Balance" /><br />
-        <ValidationMessage For="()=>Prestamo.Balance" />
-    </div>
-</div>
-<div class="form-field">
-    <label>Monto: </label>
-    <div>
-        <InputNumber disable="true" @bind-Value="Prestamo.Monto" /><br />
-        <ValidationMessage For="()=>Prestamo.Monto" />
-    </div>
-</div>
+
+
+
+
 
 @code {
     [Parameter] public Prestamo Prestamo { get; set; }
+    Mora NuevaMora = new Mora();
+
+    void EliminarMora(Mora mora) {
+        Prestamo.Moras.Remove(mora);
+    }
+
+    void AgregarMora() {
+        Prestamo.Moras.Add(new Mora { Monto = NuevaMora.Monto });
+        NuevaMora = new Mora();
+    }
+
 }

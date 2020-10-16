@@ -1,4 +1,23 @@
-﻿<div class="form-field">
+﻿<style>
+    .form-field {
+        display: flex;
+        margin: 0.5rem;
+    }
+
+        .form-field > label {
+            width: 8rem;
+        }
+
+        .form-field > div {
+            flex-grow: 1;
+        }
+
+        .form-field input {
+            width: 100%;
+        }
+</style>
+
+<div class="form-field">
     <label>Nombres: </label>
     <div>
         <InputText @bind-Value="Persona.Nombres" /><br />

@@ -16,6 +16,28 @@ namespace BlazorPrestamos.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.8");
 
+            modelBuilder.Entity("BlazorPrestamos.Entidades.Mora", b =>
+                {
+                    b.Property<int>("MoraId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PrestamoId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("MoraId");
+
+                    b.HasIndex("PrestamoId");
+
+                    b.ToTable("Mora");
+                });
+
             modelBuilder.Entity("BlazorPrestamos.Entidades.Persona", b =>
                 {
                     b.Property<int>("Id")
@@ -36,7 +58,7 @@ namespace BlazorPrestamos.Migrations
 
             modelBuilder.Entity("BlazorPrestamos.Entidades.Prestamo", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("PrestamoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -55,9 +77,18 @@ namespace BlazorPrestamos.Migrations
                     b.Property<int>("PersonaId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                    b.HasKey("PrestamoId");
 
                     b.ToTable("Prestamos");
+                });
+
+            modelBuilder.Entity("BlazorPrestamos.Entidades.Mora", b =>
+                {
+                    b.HasOne("BlazorPrestamos.Entidades.Prestamo", null)
+                        .WithMany("Moras")
+                        .HasForeignKey("PrestamoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

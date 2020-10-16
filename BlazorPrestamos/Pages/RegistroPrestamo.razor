@@ -1,51 +1,71 @@
 ﻿@page "/prestamos"
 @inject IToastService toast
 
-<div class="main-header-list">
-    <h2>Lista de prestamo</h2>
-    <button type="button" class="btn btn-success" @onclick="AgregarPrestamo">+ Agregar</button>
-    <div class="filter">
-        <select class="custom-select" @bind="indexSelect">
-            <option value="0">Filtrar por</option>
-            <option value="1">PrestamoId</option>
-            <option value="2">PersonaId</option>
-        </select>
-        <input type="number" @bind="criterioDeBusqueda" />
-        <button class="btn btn-outline-primary" @onclick="FiltarPrestamos">Buscar</button>
+    <div class="container mt-3">
+        <div class="card shadow-lg">
+            <div class="card-header bg-dark">
+                <div class="form-row">
+                    <div class="col-sm flex-shrink-1">
+                        <h3 class="text-light"><i class="oi oi-dollar mr-3"/>Prestamos</h3>
+                    </div>
+                    <div class="col-sm">
+                        <button class="btn btn-dark border-light" @onclick="AgregarPrestamo">
+                            <i class="oi oi-plus"/>
+                            Agregar
+                        </button>
+                    </div>
+                    <div class="col-sm">
+                        <select @bind="indexSelect" class="custom-select">
+                            <option value="0">Filtrar por</option>
+                            <option value="1">PrestamoId</option>
+                            <option value="2">PersonaId</option>
+                        </select>
+                    </div>
+                    <div class="col-sm">
+                        <input class="form-control w-100" type="@(indexSelect == 1 ? "number" : "text")" @bind="criterioDeBusqueda" />
+                    </div>
+                    <div class="col-sm text-center">
+                        <button class="btn btn-dark border-light" @onclick="FiltarPrestamos">
+                            <i class="oi oi-magnifying-glass"/>
+                            Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body overflow-auto">
+                @if (Prestamos == null || PrestamosFiltrados == null) {
+                    <div>
+                        <h4>Cargando...</h4>
+                    </div>
+                } else {
+                    <table class="table table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Prestamo Id</th>
+                                <th>Presona Id</th>
+                                <th>Concepto</th>
+                                <th>Monto</th>
+                                <th>Balance</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var prestamo in PrestamosFiltrados) {
+                                <tr>
+                                    <td>@prestamo.PrestamoId</td>
+                                    <td>@prestamo.PersonaId</td>
+                                    <td>@prestamo.Concepto</td>
+                                    <td>@string.Format("{0:c}" , prestamo.Monto)</td>
+                                    <td>@string.Format("{0:c}" , prestamo.Balance + prestamo.BalanceMoras())</td>
+                                    <td><button @onclick="()=>ModificarPrestamo(prestamo)" class="btn btn-outline-dark">Ver</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
     </div>
-</div>
-
-
-@if (Prestamos == null || PrestamosFiltrados == null) {
-    <div class="loading-message">
-        <span>Cargando...</span>
-    </div>
-} else {
-    <table class="table table-hover">
-        <thead class="thead-light">
-            <tr>
-                <th>Id</th>
-                <th>PersonaId</th>
-                <th>Balance</th>
-                <th>Fecha</th>
-                <th>Monto</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var prestamo in PrestamosFiltrados) {
-                <tr>
-                    <td>@prestamo.Id</td>
-                    <td>@prestamo.PersonaId</td>
-                    <td>@prestamo.Balance</td>
-                    <th>@prestamo.Fecha</th>
-                    <th>@prestamo.Monto</th>
-                    <td><button class="btn btn-warning" @onclick="()=>ModificarPrestamo(prestamo)">Mas</button></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
 
 @if (MostraDialogoEditor) {
     Title = EsNuevoPrestamo ? "Nuevo Prestamo" : "Modificar Prestamo";
@@ -58,9 +78,9 @@
             </EditForm>
         </Body>
         <Footer>
-            <button type="button" disabled="@(!EsNuevoPrestamo)" class="btn btn-warning" @onclick="Nuevo">Nuevo</button>
-            <input type="submit" form="form-prestamos" class="btn btn-success" value="Guardar" />
-            <button type="button" disabled="@(EsNuevoPrestamo)" class="btn btn-danger" @onclick="Eliminar">Eliminar</button>
+            <button type="button" disabled="@(!EsNuevoPrestamo)" class="btn btn-outline-warning" @onclick="Nuevo">Nuevo</button>
+            <input type="submit" form="form-prestamos" class="btn btn-outline-success" value="Guardar" />
+            <button type="button" disabled="@(EsNuevoPrestamo)" class="btn btn-outline-danger" @onclick="Eliminar">Eliminar</button>
         </Footer>
     </Dialogo>
 }
@@ -138,7 +158,7 @@
     async Task Eliminar() {
         bool eliminado;
 
-        eliminado = await PrestamosBLL.Eliminar(prestamoEnModificacion.Id);
+        eliminado = await PrestamosBLL.Eliminar(prestamoEnModificacion.PrestamoId);
 
         if (eliminado) {
             toast.ShowSuccess("Eliminado");
@@ -158,7 +178,7 @@
 
             if (int.TryParse(criterioDeBusqueda , out int Id)) {
 
-                PrestamosFiltrados = Prestamos.Where(e => e.Id == Id).ToList();
+                PrestamosFiltrados = Prestamos.Where(e => e.PrestamoId == Id).ToList();
             }
 
         } else if (indexSelect == 2) {//PrestamoId

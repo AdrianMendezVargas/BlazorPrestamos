@@ -1,47 +1,70 @@
 ﻿@page "/personas"
 @inject IToastService toast
 
-<div class="main-header-list">
-    <h2>Lista de persona</h2>
-    <button type="button" class="btn btn-success" @onclick="AgregarPersona">+ Agregar</button>
-    <div class="filter">
-        <select class="custom-select" @bind="indexSelect">
-            <option value="0">Filtrar por</option>
-            <option value="1">Id</option>
-            <option value="2">Nombre</option>
-        </select>
-        <input type="@((indexSelect == 1) ? "number" : "text")" @bind="criterioDeBusqueda" />
-        <button class="btn btn-outline-primary" @onclick="FiltarPersonas">Buscar</button>
+
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header bg-dark">
+            <div class="form-row">
+                <div class="col-sm">
+                    <h3 class="text-light"><i class="oi oi-person mr-3" />Personas</h3>
+                </div>
+                <div class="col-sm">
+                    <button class="btn btn-dark border-light" @onclick="AgregarPersona">
+                        <i class="oi oi-plus" />
+                        Agregar
+                    </button>
+                </div>
+                <div class="col-sm">
+                    <select @bind="indexSelect" class="custom-select">
+                        <option value="0">Filtrar por</option>
+                        <option value="1">Id</option>
+                        <option value="2">Nombre</option>
+                    </select>
+                </div>
+                <div class="col-sm">
+                    <input class="form-control w-100" type="@(indexSelect == 1 ? "number" : "text")" @bind="criterioDeBusqueda" />
+                </div>
+                <div class="col-sm text-center">
+                    <button class="btn btn-dark border-light" @onclick="FiltarPersonas">
+                        <i class="oi oi-magnifying-glass" />
+                        Buscar
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Personas == null || PersonasFiltrados == null) {
+                <div>
+                    <h4>Cargando...</h4>
+                </div>
+            } else {
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Persona Id</th>
+                            <th>Nombres</th>
+                            <th>Balance</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var persona in PersonasFiltrados) {
+                            <tr>
+                                <td>@persona.Id</td>
+                                <td>@persona.Nombres</td>
+                                <td>@string.Format("{0:c}" , persona.Balance)</td>
+                                <td><button @onclick="()=>ModificarPersona(persona)" class="btn btn-outline-dark">Ver</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
     </div>
 </div>
 
 
-@if (Personas == null || PersonasFiltrados == null) {
-    <div class="loading-message">
-        <span>Cargando...</span>
-    </div>
-} else {
-    <table class="table table-hover">
-        <thead class="thead-light">
-            <tr>
-                <th>Id</th>
-                <th>Nombres</th>
-                <th>Balance</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var persona in PersonasFiltrados) {
-                <tr>
-                    <td>@persona.Id</td>
-                    <td>@persona.Nombres</td>
-                    <td>@persona.Balance</td>
-                    <td><button class="btn btn-warning" @onclick="()=>ModificarPersona(persona)">Mas</button></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
 
 @if (MostraDialogoEditor) {
     Title = EsNuevoPersona ? "Nuevo Persona" : "Modificar Persona";
@@ -111,24 +134,17 @@
     }
     async Task Guardar() {
 
-        Persona persona = await PersonasBLL.Buscar(personaEnModificacion.Id);
+        bool guardo;
 
-        if (persona == null) {
-            toast.ShowError("Esta persona no existe");
-            return;
+        guardo = await PersonasBLL.Guardar(personaEnModificacion);
 
-        } else {
-            bool guardo;
+        if (guardo) {
+            toast.ShowSuccess("Guardado ");
+            Nuevo();
+            await OcultarDialogo();
+        } else
+            toast.ShowError("Error al guardar");
 
-            guardo = await PersonasBLL.Guardar(personaEnModificacion);
-
-            if (guardo) {
-                toast.ShowSuccess("Guardado ");
-                Nuevo();
-                await OcultarDialogo();
-            } else
-                toast.ShowError("Error al guardar");
-        }
     }
 
     async Task Eliminar() {

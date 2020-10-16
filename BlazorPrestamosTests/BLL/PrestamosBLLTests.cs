@@ -21,7 +21,7 @@ namespace BlazorPrestamos.BLL.Tests {
             bool FuePersonaBalanceModificado = false;
 
             Prestamo prestamo = new Prestamo {
-                Id = 0 ,
+                PrestamoId = 0 ,
                 PersonaId = personaId ,
                 Monto = 1000 ,
                 Balance = 1000 ,

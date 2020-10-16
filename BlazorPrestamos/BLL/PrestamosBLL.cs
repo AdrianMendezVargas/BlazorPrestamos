@@ -10,7 +10,7 @@ namespace BlazorPrestamos.BLL {
     public class PrestamosBLL {
 
         public async static Task<bool> Guardar(Prestamo prestamo) {
-            if (!await Existe(prestamo.Id))
+            if (!await Existe(prestamo.PrestamoId))
                 return await Insertar(prestamo);
             else
                 return await Modificar(prestamo);
@@ -43,6 +43,12 @@ namespace BlazorPrestamos.BLL {
             Contexto contexto = new Contexto();
 
             try {
+                await contexto.Database.ExecuteSqlRawAsync($"Delete from Mora Where PrestamoId = {prestamo.PrestamoId}");
+               
+                foreach (var mora in prestamo.Moras) {
+                    contexto.Entry(mora).State = EntityState.Added;
+                }
+
                 contexto.Entry(prestamo).State = EntityState.Modified;
 
                 paso = await contexto.SaveChangesAsync() > 0;
@@ -69,6 +75,10 @@ namespace BlazorPrestamos.BLL {
                 persona.Balance = 0;
                 foreach (var prestamo in await GetPrestamos()) {
                     persona.Balance += prestamo.Balance;
+
+                    foreach (var mora in prestamo.Moras) {
+                        persona.Balance += mora.Monto;
+                    }
                 }
 
                 await PersonasBLL.Modificar(persona);
@@ -104,7 +114,8 @@ namespace BlazorPrestamos.BLL {
 
             try {
                 prestamo = await contexto.Prestamos
-                    .Where(p => p.Id == id)
+                    .Where(p => p.PrestamoId == id)
+                    .Include(p => p.Moras)
                     .FirstOrDefaultAsync();
             } catch (Exception) {
                 throw;
@@ -121,7 +132,7 @@ namespace BlazorPrestamos.BLL {
             bool encontrado = false;
 
             try {
-                encontrado = await contexto.Prestamos.AnyAsync(p => p.Id == id);
+                encontrado = await contexto.Prestamos.AnyAsync(p => p.PrestamoId == id);
             } catch (Exception) {
                 throw;
             } finally {
@@ -137,8 +148,8 @@ namespace BlazorPrestamos.BLL {
             List<Prestamo> prestamos = new List<Prestamo>();
             await Task.Delay(01); //Para dar tiempo a renderizar el mensaje de carga
 
-            try {
-                prestamos = await contexto.Prestamos.ToListAsync();
+            try {//TODO: Optimizar la carga del detalle y cargarlo solo al hacer click en el boton VER de la tabla
+                prestamos = await contexto.Prestamos.Include(p => p.Moras).ToListAsync();
 
             } catch (Exception) {
 
