@@ -102,7 +102,7 @@
     public List<Prestamo> PrestamosFiltrados { get; set; }
 
     protected async override Task OnInitializedAsync() {
-        Prestamos = await PrestamosBLL.GetPrestamos();
+        Prestamos = await PrestamosBLL.GetPrestamos(p => true);
         PrestamosFiltrados = Prestamos;
     }
 
@@ -120,7 +120,7 @@
 
     async Task OcultarDialogo() {
         MostraDialogoEditor = false;
-        Prestamos = await PrestamosBLL.GetPrestamos();
+        Prestamos = await PrestamosBLL.GetPrestamos(p => true);
         QuitarFiltros();
     }
 

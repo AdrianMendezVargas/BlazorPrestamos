@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace BlazorPrestamos.BLL {
@@ -73,7 +74,7 @@ namespace BlazorPrestamos.BLL {
             if (persona != null) {
 
                 persona.Balance = 0;
-                foreach (var prestamo in await GetPrestamos()) {
+                foreach (var prestamo in await GetPrestamos(p => p.PersonaId == persona.Id)) {
                     persona.Balance += prestamo.Balance;
 
                     foreach (var mora in prestamo.Moras) {
@@ -142,14 +143,16 @@ namespace BlazorPrestamos.BLL {
             return encontrado;
         }
 
-        public async static Task<List<Prestamo>> GetPrestamos() {
+        public async static Task<List<Prestamo>> GetPrestamos(Expression<Func<Prestamo, bool>> expression) {
             Contexto contexto = new Contexto();
 
             List<Prestamo> prestamos = new List<Prestamo>();
             await Task.Delay(01); //Para dar tiempo a renderizar el mensaje de carga
 
             try {//TODO: Optimizar la carga del detalle y cargarlo solo al hacer click en el boton VER de la tabla
-                prestamos = await contexto.Prestamos.Include(p => p.Moras).ToListAsync();
+                prestamos = await contexto.Prestamos.Where(expression)
+                    .Include(p => p.Moras)
+                    .ToListAsync();
 
             } catch (Exception) {
 
